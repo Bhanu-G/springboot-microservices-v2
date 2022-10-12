@@ -1,0 +1,60 @@
+version: '3.7'
+
+services:
+  currency-exchange:
+    image: in28min/ms-currency-exchange-service-v1:latest
+    mem_limit: 700m
+    ports:
+      - "8001:8001"
+    networks:
+      - currency-network
+    depends_on:
+      - service-registry
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://service-registry:8761/eureka
+      spring.zipkin.baseUrl: http://zipkin-server:9411/
+      
+  currency-conversion:
+    image: in28min/ms-currency-conversion-service-v1:latest
+    mem_limit: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - currency-network
+    depends_on:
+      - service-registry
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://service-registry:8761/eureka
+      spring.zipkin.baseUrl: http://zipkin-server:9411/
+      
+  api-gateway:
+    image: in28min/ms-api-gateway-v1:latest
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - currency-network
+    depends_on:
+      - service-registry
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://service-registry:8761/eureka
+      spring.zipkin.baseUrl: http://zipkin-server:9411/
+
+  service-registry:
+    image: in28min/ms-service-registry-v1:latest
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - currency-network
+
+  zipkin-server:
+    image: openzipkin/zipkin
+    mem_limit: 700m
+    ports:
+      - "9411:9411"
+    networks:
+      - currency-network
+    
+networks:
+  currency-network:
